@@ -639,5 +639,287 @@ class SistemaSoftwareFJ:
             print(reserva.mostrar_informacion())
             print("----------------------------------")
 
+# 11. FUNCION PARA MANEJO CONTROLADO DE ERRORES
 
+def ejecutar_operacion(descripcion, operacion):
 
+    print(f"\n>>> {descripcion}")
+
+    try:
+        resultado = operacion()
+
+    except SoftwareFJError as error:
+        logger.exception("Error controlado: %s", descripcion)
+        print("ERROR CONTROLADO:", error)
+
+    except Exception as error:
+        logger.exception("Error inesperado: %s", descripcion)
+        print("ERROR INESPERADO:", error)
+
+    else:
+        logger.info("Operacion exitosa: %s", descripcion)
+        print("Operacion realizada correctamente.")
+
+        if resultado is not None:
+            print(resultado)
+
+    finally:
+        print("Operacion finalizada. El sistema continua activo.")
+
+# 12. SIMULACION DE OPERACIONES
+
+def ejecutar_demostracion():
+
+    sistema = SistemaSoftwareFJ()
+
+    print("\n")
+    print("=" * 55)
+    print("       SISTEMA INTEGRAL SOFTWARE FJ")
+    print("       DEMOSTRACION DE FUNCIONAMIENTO")
+    print("=" * 55)
+
+    # -----------------------------------------------
+    # OPERACION 1: REGISTRO DE CLIENTE VALIDO
+    # -----------------------------------------------
+
+    cliente1 = Cliente(
+        "Carlos Ramirez",
+        "1020304050",
+        "carlos@gmail.com",
+        "3001234567"
+    )
+
+    ejecutar_operacion(
+        "Operacion 1: Registrar cliente valido",
+        lambda: sistema.registrar_cliente(cliente1).mostrar_informacion()
+    )
+
+    # -----------------------------------------------
+    # OPERACION 2: CLIENTE CON CORREO INVALIDO
+    # -----------------------------------------------
+
+    ejecutar_operacion(
+        "Operacion 2: Registrar cliente con correo incorrecto",
+        lambda: Cliente(
+            "Maria Lopez",
+            "2030405060",
+            "correo_invalido",
+            "3101234567"
+        )
+    )
+
+    # -----------------------------------------------
+    # OPERACION 3: REGISTRO DE SEGUNDO CLIENTE
+    # -----------------------------------------------
+
+    cliente2 = Cliente(
+        "Laura Torres",
+        "3040506070",
+        "laura@gmail.com",
+        "3201234567"
+    )
+
+    ejecutar_operacion(
+        "Operacion 3: Registrar segundo cliente",
+        lambda: sistema.registrar_cliente(cliente2).nombre
+    )
+
+    # -----------------------------------------------
+    # OPERACION 4: CREAR SERVICIO DE SALAS
+    # -----------------------------------------------
+
+    sala = ReservaSala("Sala de reuniones", 50000, 2)
+
+    ejecutar_operacion(
+        "Operacion 4: Crear servicio de salas",
+        lambda: sistema.registrar_servicio(sala).nombre
+    )
+
+    # -----------------------------------------------
+    # OPERACION 5: CREAR SERVICIO DE EQUIPOS
+    # -----------------------------------------------
+
+    equipo = AlquilerEquipo("Computador portatil", 80000, 5)
+
+    ejecutar_operacion(
+        "Operacion 5: Crear servicio de equipos",
+        lambda: sistema.registrar_servicio(equipo).nombre
+    )
+
+    # -----------------------------------------------
+    # OPERACION 6: CREAR SERVICIO DE ASESORIAS
+    # -----------------------------------------------
+
+    asesoria = AsesoriaEspecializada(
+        "Asesoria tecnologica", 100000, 3
+    )
+
+    ejecutar_operacion(
+        "Operacion 6: Crear servicio de asesoria",
+        lambda: sistema.registrar_servicio(asesoria).nombre
+    )
+
+    # -----------------------------------------------
+    # OPERACION 7: CREAR SERVICIO INVALIDO
+    # -----------------------------------------------
+
+    ejecutar_operacion(
+        "Operacion 7: Crear servicio con tarifa negativa",
+        lambda: ReservaSala("Sala invalida", -5000)
+    )
+
+    # -----------------------------------------------
+    # OPERACION 8: RESERVA CORRECTA DE SALA
+    # -----------------------------------------------
+
+    reserva1 = sistema.crear_reserva(
+        cliente1, sala, 3, personas=15
+    )
+
+    ejecutar_operacion(
+        "Operacion 8: Confirmar y procesar reserva de sala",
+        lambda: (
+            reserva1.confirmar(),
+            reserva1.procesar(impuesto=19, descuento=10)
+        )
+    )
+
+    # -----------------------------------------------
+    # OPERACION 9: RESERVA CORRECTA DE EQUIPOS
+    # -----------------------------------------------
+
+    reserva2 = sistema.crear_reserva(
+        cliente2, equipo, 2, cantidad=2
+    )
+
+    ejecutar_operacion(
+        "Operacion 9: Confirmar y procesar alquiler de equipos",
+        lambda: (
+            reserva2.confirmar(),
+            reserva2.procesar(impuesto=19)
+        )
+    )
+
+    # -----------------------------------------------
+    # OPERACION 10: RESERVA CORRECTA DE ASESORIA
+    # -----------------------------------------------
+
+    reserva3 = sistema.crear_reserva(
+        cliente1,
+        asesoria,
+        2,
+        especialidad="software"
+    )
+
+    ejecutar_operacion(
+        "Operacion 10: Confirmar y procesar asesoria",
+        lambda: (
+            reserva3.confirmar(),
+            reserva3.procesar(impuesto=19)
+        )
+    )
+
+    # -----------------------------------------------
+    # OPERACION 11: RESERVA CON DURACION INVALIDA
+    # -----------------------------------------------
+
+    ejecutar_operacion(
+        "Operacion 11: Crear reserva con duracion incorrecta",
+        lambda: sistema.crear_reserva(
+            cliente1, sala, -5, personas=10
+        )
+    )
+
+    # -----------------------------------------------
+    # OPERACION 12: CLIENTE NO REGISTRADO
+    # -----------------------------------------------
+
+    cliente_no_registrado = Cliente(
+        "Pedro Gomez",
+        "4050607080",
+        "pedro@gmail.com",
+        "3151234567"
+    )
+
+    ejecutar_operacion(
+        "Operacion 12: Reserva con cliente no registrado",
+        lambda: sistema.crear_reserva(
+            cliente_no_registrado, sala, 2, personas=5
+        )
+    )
+
+    # -----------------------------------------------
+    # OPERACION 13: CANCELACION DE RESERVA
+    # -----------------------------------------------
+
+    ejecutar_operacion(
+        "Operacion 13: Cancelar reserva confirmada",
+        lambda: reserva2.cancelar()
+    )
+
+    # -----------------------------------------------
+    # OPERACION 14: INTENTO DE CANCELACION INCORRECTA
+    # -----------------------------------------------
+
+    ejecutar_operacion(
+        "Operacion 14: Cancelar reserva ya cancelada",
+        lambda: reserva2.cancelar()
+    )
+
+    # -----------------------------------------------
+    # OPERACION 15: PROCESAR RESERVA PENDIENTE
+    # -----------------------------------------------
+
+    reserva4 = sistema.crear_reserva(
+        cliente2, sala, 2, personas=10
+    )
+
+    ejecutar_operacion(
+        "Operacion 15: Procesar reserva sin confirmar",
+        lambda: reserva4.procesar()
+    )
+
+    # -----------------------------------------------
+    # OPERACION 16: CALCULO CON SOBRECARGA
+    # -----------------------------------------------
+
+    ejecutar_operacion(
+        "Operacion 16: Calcular costo con impuestos y descuento",
+        lambda: (
+            f"Costo normal: ${sala.calcular_costo(2):,.2f}\n"
+            f"Con impuesto: ${sala.calcular_costo(2, 19):,.2f}\n"
+            f"Con impuesto y descuento: "
+            f"${sala.calcular_costo(2, 19, 10):,.2f}"
+        )
+    )
+
+    # -----------------------------------------------
+    # OPERACION 17: VALIDACION DE ARGUMENTOS
+    # -----------------------------------------------
+
+    ejecutar_operacion(
+        "Operacion 17: Calculo con impuesto incorrecto",
+        lambda: sala.calcular_costo(2, impuesto=150)
+    )
+
+    # -----------------------------------------------
+    # OPERACION 18: SERVICIO SIN DISPONIBILIDAD
+    # -----------------------------------------------
+
+    sala_llena = ReservaSala("Sala de capacidad limitada", 40000, 1)
+
+    sistema.registrar_servicio(sala_llena)
+
+    reserva_llena = sistema.crear_reserva(
+        cliente1, sala_llena, 2, personas=10
+    )
+    reserva_llena.confirmar()
+
+    reserva_extra = sistema.crear_reserva(
+        cliente2, sala_llena, 2, personas=10
+    )
+
+    ejecutar_operacion(
+        "Operacion 18: Intentar reservar sala sin disponibilidad",
+        lambda: reserva_extra.confirmar()
+    )
