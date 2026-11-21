@@ -174,8 +174,136 @@ class Cliente(Entidad):
             f"Telefono: {self.telefono}"
         )
 
+#5. CLASE ABSTRACTA SERVICIO
 
+class Servicio(Entidad, ABC):
 
+    def __init__(self, nombre, tarifa, capacidad=10):
+        super().__init__()
 
+        if not isinstance(nombre, str) or not nombre.strip():
+            raise DatosInvalidosError("Nombre de servicio invalido.")
 
+        if isinstance(tarifa, bool) or not isinstance(tarifa, (int, float)):
+            raise DatosInvalidosError("La tarifa debe ser numerica.")
+
+        if tarifa <= 0:
+            raise DatosInvalidosError("La tarifa debe ser positiva.")
+
+        if isinstance(capacidad, bool) or not isinstance(capacidad, int):
+            raise DatosInvalidosError("La capacidad debe ser entera.")
+
+        if capacidad <= 0:
+            raise DatosInvalidosError("La capacidad debe ser positiva.")
+
+        self._nombre = nombre.strip()
+        self._tarifa = float(tarifa)
+        self._capacidad = capacidad
+        self._reservas_activas = 0
+
+    @property
+    def nombre(self):
+        return self._nombre
+
+    @property
+    def tarifa(self):
+        return self._tarifa
+
+    @property
+    def disponible(self):
+        return self._reservas_activas < self._capacidad
+
+    def ocupar(self):
+        if not self.disponible:
+            raise ServicioNoDisponibleError(
+                f"El servicio {self.nombre} no tiene disponibilidad."
+            )
+
+        self._reservas_activas += 1
+
+    def liberar(self):
+        if self._reservas_activas <= 0:
+            raise OperacionNoPermitidaError(
+                "No existen reservas activas para liberar."
+            )
+
+        self._reservas_activas -= 1
+
+    @abstractmethod
+    def calcular_costo_base(self, duracion, **parametros):
+        pass
+
+    @abstractmethod
+    def validar_parametros(self, duracion, **parametros):
+        pass
+
+    @abstractmethod
+    def describir_servicio(self):
+        pass
+
+ # Sobrecarga simulada mediante argumentos opcionales.
+    # Permite calcular costos con o sin impuestos y descuentos.
+
+def calcular_costo(
+        self, duracion, *args, impuesto=0, descuento=0, **parametros
+    ):
+
+        # Variantes:
+        # calcular_costo(2)
+        # calcular_costo(2, 19)
+        # calcular_costo(2, 19, 10)
+        # calcular_costo(2, impuesto=19, descuento=10)
+
+        if len(args) > 2:
+            raise DatosInvalidosError(
+                "Cantidad incorrecta de argumentos adicionales."
+            )
+
+        if len(args) >= 1:
+            if impuesto != 0:
+                raise DatosInvalidosError(
+                    "El impuesto se especifico dos veces."
+                )
+            impuesto = args[0]
+
+        if len(args) == 2:
+            if descuento != 0:
+                raise DatosInvalidosError(
+                    "El descuento se especifico dos veces."
+                )
+            descuento = args[1]
+
+        if isinstance(impuesto, bool) or not isinstance(impuesto, (int, float)):
+            raise DatosInvalidosError("Impuesto invalido.")
+
+        if isinstance(descuento, bool) or not isinstance(descuento, (int, float)):
+            raise DatosInvalidosError("Descuento invalido.")
+
+        if not 0 <= impuesto <= 100:
+            raise DatosInvalidosError(
+                "El impuesto debe estar entre 0 y 100."
+            )
+
+        if not 0 <= descuento <= 100:
+            raise DatosInvalidosError(
+                "El descuento debe estar entre 0 y 100."
+            )
+
+        self.validar_parametros(duracion, **parametros)
+
+        base = self.calcular_costo_base(duracion, **parametros)
+
+        if base < 0:
+            raise DatosInvalidosError("Calculo base inconsistente.")
+
+        subtotal = base * (1 - descuento / 100)
+        total = subtotal * (1 + impuesto / 100)
+
+        return round(total, 2)
+
+    def mostrar_informacion(self):
+        return (
+            f"Servicio: {self.nombre} | "
+            f"Tarifa: ${self.tarifa:,.2f}"
+        )
 
