@@ -540,3 +540,104 @@ class Reserva(Entidad):
             f"Costo: ${self._costo:,.2f}"
         )
 
+# 10. CLASE PRINCIPAL DEL SISTEMA
+
+class SistemaSoftwareFJ:
+
+    def __init__(self):
+        self.__clientes = []
+        self.__servicios = []
+        self.__reservas = []
+
+        logger.info("Sistema Software FJ iniciado.")
+
+    def registrar_cliente(self, cliente):
+
+        if not isinstance(cliente, Cliente):
+            raise DatosInvalidosError("Objeto cliente incorrecto.")
+
+        documento = cliente.documento
+
+        if any(c.documento == documento for c in self.__clientes):
+            raise DatosInvalidosError(
+                "Ya existe un cliente con ese documento."
+            )
+
+        self.__clientes.append(cliente)
+
+        logger.info(
+            "Cliente registrado: %s", cliente.nombre
+        )
+
+        return cliente
+
+    def registrar_servicio(self, servicio):
+
+        if not isinstance(servicio, Servicio):
+            raise DatosInvalidosError("Servicio no valido.")
+
+        if any(s.id == servicio.id for s in self.__servicios):
+            raise DatosInvalidosError("El servicio ya esta registrado.")
+
+        self.__servicios.append(servicio)
+
+        logger.info(
+            "Servicio registrado: %s", servicio.nombre
+        )
+
+        return servicio
+
+    def crear_reserva(self, cliente, servicio, duracion, **parametros):
+
+        if cliente not in self.__clientes:
+            raise ReservaInvalidaError(
+                "El cliente no esta registrado."
+            )
+
+        if servicio not in self.__servicios:
+            raise ReservaInvalidaError(
+                "El servicio no esta registrado."
+            )
+
+        reserva = Reserva(
+            cliente, servicio, duracion, **parametros
+        )
+
+        self.__reservas.append(reserva)
+
+        logger.info("Reserva creada: %s", reserva.id)
+
+        return reserva
+
+    def listar_clientes(self):
+        return self.__clientes.copy()
+
+    def listar_servicios(self):
+        return self.__servicios.copy()
+
+    def listar_reservas(self):
+        return self.__reservas.copy()
+
+    def mostrar_resumen(self):
+
+        print("\n========== RESUMEN SOFTWARE FJ ==========")
+        print("Clientes registrados:", len(self.__clientes))
+        print("Servicios registrados:", len(self.__servicios))
+        print("Reservas creadas:", len(self.__reservas))
+
+        print("\n--- CLIENTES ---")
+        for cliente in self.__clientes:
+            print(cliente.mostrar_informacion())
+
+        print("\n--- SERVICIOS ---")
+        for servicio in self.__servicios:
+            print(servicio.mostrar_informacion())
+            print(servicio.describir_servicio())
+
+        print("\n--- RESERVAS ---")
+        for reserva in self.__reservas:
+            print(reserva.mostrar_informacion())
+            print("----------------------------------")
+
+
+
