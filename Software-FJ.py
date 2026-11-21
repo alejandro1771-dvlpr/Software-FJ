@@ -38,3 +38,34 @@ if not logger.handlers:
 
     logger.addHandler(eventos)
     logger.addHandler(errores)
+
+# 2. EXCEPCIONES PERSONALIZADAS
+
+class SoftwareFJError(Exception):
+    """Excepcion general del sistema."""
+    pass
+
+
+class DatosInvalidosError(SoftwareFJError):
+    """Datos incorrectos o incompletos."""
+    pass
+
+
+class ServicioNoDisponibleError(SoftwareFJError):
+    """El servicio no tiene disponibilidad."""
+    pass
+
+
+class ReservaInvalidaError(SoftwareFJError):
+    """Error durante la gestion de una reserva."""
+    pass
+
+
+class OperacionNoPermitidaError(SoftwareFJError):
+    """Operacion incompatible con el estado actual."""
+    pass
+
+
+class ProcesamientoError(SoftwareFJError):
+    """Error durante el procesamiento de una operacion."""
+    pass
