@@ -10,3 +10,31 @@ from datetime import datetime
 import logging
 import os
 import uuid
+
+# 1. CONFIGURACION DE REGISTROS Y LOGS
+
+os.makedirs("logs", exist_ok=True)
+
+logger = logging.getLogger("SoftwareFJ")
+logger.setLevel(logging.INFO)
+logger.propagate = False
+
+if not logger.handlers:
+    formato = logging.Formatter(
+        "%(asctime)s | %(levelname)s | %(message)s"
+    )
+
+    eventos = logging.FileHandler(
+        "logs/eventos.log", encoding="utf-8"
+    )
+    eventos.setLevel(logging.INFO)
+    eventos.setFormatter(formato)
+
+    errores = logging.FileHandler(
+        "logs/errores.log", encoding="utf-8"
+    )
+    errores.setLevel(logging.ERROR)
+    errores.setFormatter(formato)
+
+    logger.addHandler(eventos)
+    logger.addHandler(errores)
