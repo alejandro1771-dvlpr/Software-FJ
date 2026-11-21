@@ -345,3 +345,41 @@ class ReservaSala(Servicio):
     def describir_servicio(self):
         return "Reserva de salas para reuniones y capacitaciones."
 
+# 7. SERVICIO ESPECIALIZADO: ALQUILER DE EQUIPOS
+
+class AlquilerEquipo(Servicio):
+
+    def __init__(self, nombre, tarifa, capacidad=10):
+        super().__init__(nombre, tarifa, capacidad)
+
+    def validar_parametros(self, duracion, **parametros):
+
+        if isinstance(duracion, bool) or not isinstance(duracion, int):
+            raise DatosInvalidosError(
+                "La duracion del alquiler debe ser un numero entero."
+            )
+
+        if duracion < 1 or duracion > 30:
+            raise DatosInvalidosError(
+                "El alquiler debe durar entre 1 y 30 dias."
+            )
+
+        cantidad = parametros.get("cantidad", 1)
+
+        if isinstance(cantidad, bool) or not isinstance(cantidad, int):
+            raise DatosInvalidosError("Cantidad de equipos invalida.")
+
+        if cantidad < 1 or cantidad > 20:
+            raise DatosInvalidosError(
+                "La cantidad debe estar entre 1 y 20 equipos."
+            )
+
+    def calcular_costo_base(self, duracion, **parametros):
+        self.validar_parametros(duracion, **parametros)
+        cantidad = parametros.get("cantidad", 1)
+
+        return self.tarifa * duracion * cantidad
+
+    def describir_servicio(self):
+        return "Alquiler de computadores y equipos tecnologicos."
+
