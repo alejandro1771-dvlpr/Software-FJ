@@ -431,3 +431,112 @@ class AsesoriaEspecializada(Servicio):
 
 # 9. CLASE RESERVA
 
+class Reserva(Entidad):
+
+    def __init__(self, cliente, servicio, duracion, **parametros):
+        super().__init__()
+
+        if not isinstance(cliente, Cliente):
+            raise DatosInvalidosError("El cliente no es valido.")
+
+        if not isinstance(servicio, Servicio):
+            raise DatosInvalidosError("El servicio no es valido.")
+
+        servicio.validar_parametros(duracion, **parametros)
+
+        self._cliente = cliente
+        self._servicio = servicio
+        self._duracion = duracion
+        self._parametros = parametros.copy()
+        self._estado = "PENDIENTE"
+        self._costo = 0.0
+
+    @property
+    def estado(self):
+        return self._estado
+
+    @property
+    def costo(self):
+        return self._costo
+
+    def confirmar(self):
+
+        if self._estado != "PENDIENTE":
+            raise OperacionNoPermitidaError(
+                "Solo se pueden confirmar reservas pendientes."
+            )
+
+        self._servicio.ocupar()
+        self._estado = "CONFIRMADA"
+
+        logger.info(
+            "Reserva %s confirmada para %s",
+            self.id, self._cliente.nombre
+        )
+
+    def cancelar(self):
+
+        if self._estado != "CONFIRMADA":
+            raise OperacionNoPermitidaError(
+                "Solo se pueden cancelar reservas confirmadas."
+            )
+
+        self._servicio.liberar()
+        self._estado = "CANCELADA"
+
+        logger.info("Reserva %s cancelada.", self.id)
+
+    def procesar(self, impuesto=19, descuento=0):
+
+        try:
+            if self._estado != "CONFIRMADA":
+                raise ReservaInvalidaError(
+                    "La reserva debe estar confirmada para procesarse."
+                )
+
+            self._costo = self._servicio.calcular_costo(
+                self._duracion,
+                impuesto=impuesto,
+                descuento=descuento,
+                **self._parametros
+            )
+
+            if self._costo < 0:
+                raise DatosInvalidosError(
+                    "El resultado del costo no puede ser negativo."
+                )
+
+            logger.info(
+                "Reserva %s procesada. Total: $%.2f",
+                self.id, self._costo
+            )
+
+            return self._costo
+
+        except Exception as error:
+            logger.exception(
+                "Error procesando reserva %s", self.id
+            )
+
+            # Encadenamiento de excepciones.
+            raise ProcesamientoError(
+                f"No fue posible procesar la reserva {self.id}."
+            ) from error
+
+        finally:
+            logger.info(
+                "Finalizo intento de procesamiento de reserva %s",
+                self.id
+            )
+
+    def mostrar_informacion(self):
+
+        return (
+            f"Reserva: {self.id}\n"
+            f"Cliente: {self._cliente.nombre}\n"
+            f"Servicio: {self._servicio.nombre}\n"
+            f"Duracion: {self._duracion}\n"
+            f"Estado: {self._estado}\n"
+            f"Costo: ${self._costo:,.2f}"
+        )
+
