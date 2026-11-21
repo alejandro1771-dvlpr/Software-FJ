@@ -69,3 +69,27 @@ class OperacionNoPermitidaError(SoftwareFJError):
 class ProcesamientoError(SoftwareFJError):
     """Error durante el procesamiento de una operacion."""
     pass
+
+# 3. CLASE ABSTRACTA ENTIDAD
+
+class Entidad(ABC):
+
+    def __init__(self):
+        self._id = str(uuid.uuid4())[:8].upper()
+        self._fecha_creacion = datetime.now()
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def fecha_creacion(self):
+        return self._fecha_creacion
+
+    @abstractmethod
+    def mostrar_informacion(self):
+        pass
+
+
+
+
