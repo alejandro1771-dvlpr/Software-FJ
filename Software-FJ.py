@@ -307,3 +307,41 @@ def calcular_costo(
             f"Tarifa: ${self.tarifa:,.2f}"
         )
 
+# 6. SERVICIO ESPECIALIZADO: RESERVA DE SALAS
+
+class ReservaSala(Servicio):
+
+    def __init__(self, nombre, tarifa, capacidad=5):
+        super().__init__(nombre, tarifa, capacidad)
+
+    def validar_parametros(self, duracion, **parametros):
+
+        if isinstance(duracion, bool) or not isinstance(duracion, (int, float)):
+            raise DatosInvalidosError("Duracion de sala invalida.")
+
+        if duracion <= 0 or duracion > 12:
+            raise DatosInvalidosError(
+                "La duracion debe estar entre 0 y 12 horas."
+            )
+
+        personas = parametros.get("personas", 1)
+
+        if isinstance(personas, bool) or not isinstance(personas, int):
+            raise DatosInvalidosError("Cantidad de personas invalida.")
+
+        if personas < 1 or personas > 50:
+            raise DatosInvalidosError(
+                "La sala admite entre 1 y 50 personas."
+            )
+
+    def calcular_costo_base(self, duracion, **parametros):
+        self.validar_parametros(duracion, **parametros)
+        personas = parametros.get("personas", 1)
+
+        recargo = 1.20 if personas > 20 else 1
+
+        return self.tarifa * duracion * recargo
+
+    def describir_servicio(self):
+        return "Reserva de salas para reuniones y capacitaciones."
+
