@@ -90,6 +90,92 @@ class Entidad(ABC):
     def mostrar_informacion(self):
         pass
 
+# 4. CLASE CLIENTE
+
+class Cliente(Entidad):
+
+    def __init__(self, nombre, documento, correo, telefono):
+        super().__init__()
+
+        self.__nombre = None
+        self.__documento = None
+        self.__correo = None
+        self.__telefono = None
+
+        self.nombre = nombre
+        self.documento = documento
+        self.correo = correo
+        self.telefono = telefono
+
+    @property
+    def nombre(self):
+        return self.__nombre
+
+    @nombre.setter
+    def nombre(self, valor):
+        if not isinstance(valor, str) or len(valor.strip()) < 3:
+            raise DatosInvalidosError(
+                "El nombre debe tener al menos 3 caracteres."
+            )
+        self.__nombre = valor.strip().title()
+
+    @property
+    def documento(self):
+        return self.__documento
+
+    @documento.setter
+    def documento(self, valor):
+        valor = str(valor).strip()
+
+        if not valor.isdigit() or len(valor) < 5:
+            raise DatosInvalidosError(
+                "El documento debe contener al menos 5 digitos."
+            )
+        self.__documento = valor
+
+    @property
+    def correo(self):
+        return self.__correo
+
+    @correo.setter
+    def correo(self, valor):
+        if not isinstance(valor, str):
+            raise DatosInvalidosError("Correo invalido.")
+
+        valor = valor.strip()
+
+        if "@" not in valor or "." not in valor.split("@")[-1]:
+            raise DatosInvalidosError(
+                "El correo electronico no tiene un formato valido."
+            )
+
+        self.__correo = valor.lower()
+
+    @property
+    def telefono(self):
+        return self.__telefono
+
+    @telefono.setter
+    def telefono(self, valor):
+        valor = str(valor).strip()
+
+        if not valor.isdigit() or len(valor) < 7:
+            raise DatosInvalidosError(
+                "El telefono debe contener al menos 7 digitos."
+            )
+
+        self.__telefono = valor
+
+    def mostrar_informacion(self):
+        return (
+            f"Cliente: {self.nombre} | "
+            f"Documento: {self.documento} | "
+            f"Correo: {self.correo} | "
+            f"Telefono: {self.telefono}"
+        )
+
+
+
 
 
 
