@@ -383,3 +383,51 @@ class AlquilerEquipo(Servicio):
     def describir_servicio(self):
         return "Alquiler de computadores y equipos tecnologicos."
 
+# 8. SERVICIO ESPECIALIZADO: ASESORIAS
+
+class AsesoriaEspecializada(Servicio):
+
+    def __init__(self, nombre, tarifa, capacidad=8):
+        super().__init__(nombre, tarifa, capacidad)
+
+    def validar_parametros(self, duracion, **parametros):
+
+        if isinstance(duracion, bool) or not isinstance(duracion, (int, float)):
+            raise DatosInvalidosError("Duracion de asesoria invalida.")
+
+        if duracion <= 0 or duracion > 8:
+            raise DatosInvalidosError(
+                "La asesoria debe durar entre 0 y 8 horas."
+            )
+
+        especialidad = parametros.get("especialidad")
+
+        if not isinstance(especialidad, str) or not especialidad.strip():
+            raise DatosInvalidosError(
+                "Debe indicar la especialidad de la asesoria."
+            )
+
+    def calcular_costo_base(self, duracion, **parametros):
+        self.validar_parametros(duracion, **parametros)
+
+        especialidad = parametros["especialidad"].lower()
+
+        recargos = {
+            "software": 1.20,
+            "seguridad": 1.35,
+            "redes": 1.15,
+            "general": 1.00
+        }
+
+        if especialidad not in recargos:
+            raise DatosInvalidosError(
+                "Especialidad no reconocida."
+            )
+
+        return self.tarifa * duracion * recargos[especialidad]
+
+    def describir_servicio(self):
+        return "Asesorias profesionales en tecnologia y sistemas."
+
+# 9. CLASE RESERVA
+
