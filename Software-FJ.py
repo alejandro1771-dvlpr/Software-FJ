@@ -1101,3 +1101,29 @@ def menu_interactivo(sistema):
 
         finally:
             print("\nSistema Software FJ activo.")
+
+# 14. PUNTO DE ENTRADA DEL PROGRAMA
+
+if __name__ == "__main__":
+
+    try:
+
+        sistema = ejecutar_demostracion()
+
+        print("\n¿Desea ingresar al menu interactivo?")
+        respuesta = input("Escriba SI o NO: ").strip().upper()
+
+        if respuesta == "SI":
+            menu_interactivo(sistema)
+
+    except Exception as error:
+
+        logger.exception("Error critico en la aplicacion.")
+
+        print("Se detecto un error general:", error)
+        print("Consulte el archivo logs/errores.log.")
+
+    finally:
+
+        logger.info("Finalizacion de la ejecucion principal.")
+        print("\nSoftware FJ: ejecucion finalizada.")
