@@ -923,3 +923,181 @@ def ejecutar_demostracion():
         "Operacion 18: Intentar reservar sala sin disponibilidad",
         lambda: reserva_extra.confirmar()
     )
+
+ # RESUMEN FINAL
+
+ sistema.mostrar_resumen()
+
+    print("\n")
+    print("=" * 55)
+    print("SIMULACION FINALIZADA")
+    print("El sistema continuo funcionando ante los errores.")
+    print("Revise los archivos logs/eventos.log y logs/errores.log")
+    print("=" * 55)
+
+    return sistema
+
+# 13. MENU INTERACTIVO DE CONSOLA
+
+def menu_interactivo(sistema):
+
+    while True:
+
+        print("\n========== MENU SOFTWARE FJ ==========")
+        print("1. Registrar cliente")
+        print("2. Consultar clientes")
+        print("3. Consultar servicios")
+        print("4. Crear reserva de sala")
+        print("5. Crear reserva de equipos")
+        print("6. Crear reserva de asesoria")
+        print("7. Consultar reservas")
+        print("8. Cancelar reserva")
+        print("9. Salir")
+
+        opcion = input("Seleccione una opcion: ").strip()
+
+        try:
+
+            if opcion == "1":
+
+                nombre = input("Nombre: ")
+                documento = input("Documento: ")
+                correo = input("Correo: ")
+                telefono = input("Telefono: ")
+
+                cliente = Cliente(
+                    nombre, documento, correo, telefono
+                )
+
+                sistema.registrar_cliente(cliente)
+                print("Cliente registrado:", cliente.nombre)
+
+            elif opcion == "2":
+
+                for cliente in sistema.listar_clientes():
+                    print(cliente.mostrar_informacion())
+
+            elif opcion == "3":
+
+                for servicio in sistema.listar_servicios():
+                    print(servicio.mostrar_informacion())
+                    print(servicio.describir_servicio())
+
+            elif opcion in ("4", "5", "6"):
+
+                clientes = sistema.listar_clientes()
+                servicios = sistema.listar_servicios()
+
+                if not clientes or not servicios:
+                    raise DatosInvalidosError(
+                        "Debe existir al menos un cliente y un servicio."
+                    )
+
+                for i, cliente in enumerate(clientes):
+                    print(i, cliente.nombre)
+
+                indice_cliente = int(input("Seleccione cliente: "))
+
+                if not 0 <= indice_cliente < len(clientes):
+                    raise DatosInvalidosError("Cliente no encontrado.")
+
+                cliente = clientes[indice_cliente]
+
+                servicios_filtrados = []
+
+                for servicio in servicios:
+                    if (
+                        opcion == "4" and isinstance(servicio, ReservaSala)
+                    ) or (
+                        opcion == "5" and isinstance(servicio, AlquilerEquipo)
+                    ) or (
+                        opcion == "6" and isinstance(
+                            servicio, AsesoriaEspecializada
+                        )
+                    ):
+                        servicios_filtrados.append(servicio)
+
+                if not servicios_filtrados:
+                    raise DatosInvalidosError(
+                        "No hay servicios de ese tipo registrados."
+                    )
+
+                for i, servicio in enumerate(servicios_filtrados):
+                    print(i, servicio.nombre)
+
+                indice_servicio = int(input("Seleccione servicio: "))
+
+                if not 0 <= indice_servicio < len(servicios_filtrados):
+                    raise DatosInvalidosError("Servicio no encontrado.")
+
+                servicio = servicios_filtrados[indice_servicio]
+                duracion = float(input("Duracion: "))
+
+                parametros = {}
+
+                if isinstance(servicio, ReservaSala):
+                    parametros["personas"] = int(
+                        input("Cantidad de personas: ")
+                    )
+
+                elif isinstance(servicio, AlquilerEquipo):
+                    parametros["cantidad"] = int(
+                        input("Cantidad de equipos: ")
+                    )
+
+                elif isinstance(servicio, AsesoriaEspecializada):
+                    parametros["especialidad"] = input(
+                        "Especialidad (software, seguridad, redes, general): "
+                    )
+
+                reserva = sistema.crear_reserva(
+                    cliente, servicio, duracion, **parametros
+                )
+
+                reserva.confirmar()
+                total = reserva.procesar()
+
+                print("Reserva confirmada.")
+                print("Total a pagar: $", total)
+
+            elif opcion == "7":
+
+                for reserva in sistema.listar_reservas():
+                    print(reserva.mostrar_informacion())
+                    print("------------------------")
+
+            elif opcion == "8":
+
+                reservas = sistema.listar_reservas()
+
+                for i, reserva in enumerate(reservas):
+                    print(i, reserva.id, reserva.estado)
+
+                indice = int(input("Seleccione reserva: "))
+
+                if not 0 <= indice < len(reservas):
+                    raise DatosInvalidosError("Reserva no encontrada.")
+
+                reservas[indice].cancelar()
+                print("Reserva cancelada correctamente.")
+
+            elif opcion == "9":
+                print("Gracias por utilizar Software FJ.")
+                logger.info("Sesion de consola finalizada.")
+                break
+
+            else:
+                raise DatosInvalidosError(
+                    "Seleccione una opcion valida del 1 al 9."
+                )
+
+        except (SoftwareFJError, ValueError) as error:
+            logger.exception("Error en el menu interactivo.")
+            print("No se pudo completar la operacion:", error)
+
+        except Exception as error:
+            logger.exception("Error inesperado en el menu.")
+            print("Error inesperado:", error)
+
+        finally:
+            print("\nSistema Software FJ activo.")
